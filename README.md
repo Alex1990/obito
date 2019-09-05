@@ -10,7 +10,8 @@ npm install --global obito
 
 ## Usage
 
-Firstly, create a file named `.obitorc` in your HOME directory.
+Firstly, create a file named `.obitorc` in your $HOME directory or any other directory.
+The obito will merged the `.obitorc`s of current working directory (**preferred**) and $HOME direcotry.
 
 **.obitorc**
 
