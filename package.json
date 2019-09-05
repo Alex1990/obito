@@ -1,0 +1,61 @@
+{
+  "name": "obito",
+  "version": "0.1.0",
+  "description": "Sync npm package(s) to cloud storage, such as Aliyun OSS",
+  "main": "src/index.js",
+  "bin": {
+    "obito": "./bin/obito"
+  },
+  "scripts": {
+    "lint": "standard src/**/*.js test/**/*.js",
+    "test": "npm run lint && jest",
+    "test:coverage": "npm test -- --coverage"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "{src,test}/**/*.js": [
+      "standard --fix",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Alex1990/obito.git"
+  },
+  "keywords": [
+    "sync",
+    "upload",
+    "package",
+    "cloud",
+    "storage",
+    "oss"
+  ],
+  "author": "Alex Chao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Alex1990/obito/issues"
+  },
+  "homepage": "https://github.com/Alex1990/obito#readme",
+  "dependencies": {
+    "ali-oss": "^6.1.1",
+    "async": "^3.1.0",
+    "chalk": "^2.4.2",
+    "commander": "^3.0.1",
+    "ini": "^1.3.5",
+    "klaw": "^3.0.0",
+    "pretty-bytes": "^5.3.0",
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "husky": "^3.0.5",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.2.5",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "standard": "^14.1.0"
+  }
+}

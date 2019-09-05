@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+const os = require('os')
+const path = require('path')
+const program = require('commander')
+const shell = require('shelljs')
+const chalk = require('chalk')
+const upload = require('../src/upload')
+
+const homeDir = os.homedir()
+const cachePrefix = path.join(homeDir, 'obito')
+const cacheDir = path.join(cachePrefix, os.platform() === 'win32' ? 'node_modules' : 'lib/node_modules')
+
+program
+  .parse(process.argv)
+
+const pkgs = program.args
+
+if (pkgs.length === 0) shell.exit(0)
+
+if (!shell.which('npm')) {
+  shell.echo('need npm installed')
+  shell.exit(1)
+}
+
+if (shell.exec(`npm install -g --prefix ${cachePrefix} ${pkgs.join(' ')}`).code !== 0) {
+  shell.echo('npm install error')
+  shell.exit(1)
+}
+
+const pkgDirs = pkgs.map(pkg => {
+  const atIndex = pkg.indexOf('@')
+  let pkgName = pkg
+  if (atIndex > -1) {
+    pkgName = pkg.slice(0, atIndex)
+  }
+  return path.join(cacheDir, pkgName)
+})
+
+upload(pkgDirs)
+  .then(() => {
+    shell.exit(0)
+  }, err => {
+    console.error(err)
+    shell.exit(1)
+  })
+

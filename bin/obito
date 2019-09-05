@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const program = require('commander')
+
+program
+  .version(require('../package.json').version)
+  .command('sync <package>', 'sync the package(s) to cloud storage')
+  .parse(process.argv)
