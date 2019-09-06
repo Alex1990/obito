@@ -12,9 +12,13 @@ const cachePrefix = path.join(homeDir, 'obito')
 const cacheDir = path.join(cachePrefix, os.platform() === 'win32' ? 'node_modules' : 'lib/node_modules')
 
 program
+  .option('-u, --uploader <uploader>', 'the uploader of cloud storage, one of aliyun, s3', 'aliyun')
   .parse(process.argv)
 
-const pkgs = program.args
+const {
+  uploader,
+  args: pkgs
+} = program
 
 if (pkgs.length === 0) shell.exit(0)
 
@@ -37,7 +41,7 @@ const pkgDirs = pkgs.map(pkg => {
   return path.join(cacheDir, pkgName)
 })
 
-upload(pkgDirs)
+upload({ uploader, pkgDirs })
   .then(() => {
     shell.exit(0)
   }, err => {

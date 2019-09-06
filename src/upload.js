@@ -24,9 +24,8 @@ function getPackageFiles (pkgDir) {
   })
 }
 
-async function uploadPackage (pkgDir) {
+async function uploadPackage ({ uploader, pkgDir }) {
   const files = await getPackageFiles(pkgDir)
-  const uploader = 'aliyun'
   const pkg = require(path.join(pkgDir, 'package.json'))
   const objectNamePrefix = `${config.prefix || ''}/${pkg.name}@${pkg.version}/`
 
@@ -34,7 +33,7 @@ async function uploadPackage (pkgDir) {
     Async.mapLimit(files, 10, async (file) => {
       const relativeFileName = path.relative(pkgDir, file.path)
       const objectName = `${objectNamePrefix}${relativeFileName}`
-      uploaders[uploader].upload(objectName, file.path)
+      await uploaders[uploader].upload(objectName, file.path)
       return {
         objectName,
         size: file.size
@@ -49,8 +48,8 @@ async function uploadPackage (pkgDir) {
   })
 }
 
-module.exports = async function upload (pkgDirs) {
-  const uploads = pkgDirs.map(pkgDir => uploadPackage(pkgDir))
+module.exports = async function upload ({ uploader, pkgDirs }) {
+  const uploads = pkgDirs.map(pkgDir => uploadPackage({ uploader, pkgDir }))
   const results = await Promise.all(uploads)
   const files = results.reduce((a, b) => a.concat(b), [])
   const line = Array(80).fill('=').join('')
