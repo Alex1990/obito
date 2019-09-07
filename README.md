@@ -1,6 +1,6 @@
 # obito
 
-A cli to sync npm package(s) to cloud storage, such as Aliyun OSS.
+obito (`/ˈɔːbitəu/`): A cli to sync npm package(s) to cloud storage, such as Aliyun OSS.
 
 ## Installation
 
