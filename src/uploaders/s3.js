@@ -1,3 +1,4 @@
+const debug = require('debug')('obito:s3')
 const fs = require('fs')
 const path = require('path')
 const AWS = require('aws-sdk')
@@ -13,6 +14,7 @@ exports.upload = async (objectName, filePath) => {
       secretAccessKey: config.s3.secretAccessKey,
       Bucket: config.s3.bucket
     })
+    debug(`instantiate s3 instance: ${config.s3}`)
   }
 
   await client.putObject({

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const debug = require('debug')('obito:bin:obito-sync')
 const os = require('os')
 const path = require('path')
 const program = require('commander')
@@ -31,6 +32,7 @@ if (shell.exec(`npm install -g --prefix ${cachePrefix} ${pkgs.join(' ')}`).code 
   shell.echo('npm install error')
   shell.exit(1)
 }
+debug(`packages installed in ${cacheDir}`)
 
 const pkgDirs = pkgs.map(pkg => {
   const atIndex = pkg.indexOf('@')

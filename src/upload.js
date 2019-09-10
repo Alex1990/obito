@@ -1,3 +1,4 @@
+const debug = require('debug')('obito:upload')
 const fs = require('fs')
 const path = require('path')
 const Async = require('async')
@@ -8,6 +9,7 @@ const config = require('./config')
 const uploaders = require('./uploaders')
 
 function getPackageFiles (pkgDir) {
+  debug(`getPackageFiles start: ${pkgDir}`)
   return new Promise((resolve, reject) => {
     const files = []
     klaw(pkgDir)
@@ -16,15 +18,20 @@ function getPackageFiles (pkgDir) {
         const relativeFileName = path.relative(pkgDir, file.path)
         if (stats.isFile() && relativeFileName.indexOf('node_modules') !== 0) {
           file.size = stats.size
+          debug(`getPackageFiles push: ${file.path}`)
           files.push(file)
         }
       })
-      .on('end', () => resolve(files))
+      .on('end', () => {
+        debug(`getPackageFiles end: ${pkgDir}, file count: ${files.count}`)
+        resolve(files)
+      })
       .on('error', reject)
   })
 }
 
 async function uploadPackage ({ uploader, pkgDir }) {
+  debug(`uploadPackage start: ${uploader}, ${pkgDir}`)
   const files = await getPackageFiles(pkgDir)
   const pkg = require(path.join(pkgDir, 'package.json'))
   const objectNamePrefix = `${config.prefix || ''}/${pkg.name}@${pkg.version}/`
@@ -34,6 +41,7 @@ async function uploadPackage ({ uploader, pkgDir }) {
       const relativeFileName = path.relative(pkgDir, file.path)
       const objectName = `${objectNamePrefix}${relativeFileName}`
       await uploaders[uploader].upload(objectName, file.path)
+      debug(`upload file ${file.path} to ${objectName} success`)
       return {
         objectName,
         size: file.size
@@ -42,6 +50,7 @@ async function uploadPackage ({ uploader, pkgDir }) {
       if (err) {
         reject(err)
       } else {
+        debug(`upload ${pkgDir} finished, files count: ${results.length}`)
         resolve(results)
       }
     })
@@ -49,6 +58,7 @@ async function uploadPackage ({ uploader, pkgDir }) {
 }
 
 module.exports = async function upload ({ uploader, pkgDirs }) {
+  debug(`upload start, uploader: ${uploader}, packages: ${pkgDirs}`)
   const uploads = pkgDirs.map(pkgDir => uploadPackage({ uploader, pkgDir }))
   const results = await Promise.all(uploads)
   const files = results.reduce((a, b) => a.concat(b), [])
