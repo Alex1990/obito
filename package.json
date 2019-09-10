@@ -1,6 +1,6 @@
 {
   "name": "obito",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A cli to sync npm package(s) to cloud storage, such as Aliyun OSS",
   "main": "src/index.js",
   "bin": {
