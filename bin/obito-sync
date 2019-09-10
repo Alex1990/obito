@@ -14,10 +14,12 @@ const cacheDir = path.join(cachePrefix, os.platform() === 'win32' ? 'node_module
 
 program
   .option('-u, --uploader <uploader>', 'the uploader of cloud storage, one of aliyun, s3', 'aliyun')
+  .option('-p, --progress', 'show the upload progress bar', false)
   .parse(process.argv)
 
 const {
   uploader,
+  progress,
   args: pkgs
 } = program
 
@@ -43,7 +45,7 @@ const pkgDirs = pkgs.map(pkg => {
   return path.join(cacheDir, pkgName)
 })
 
-upload({ uploader, pkgDirs })
+upload({ uploader, progress, pkgDirs })
   .then(() => {
     shell.exit(0)
   }, err => {

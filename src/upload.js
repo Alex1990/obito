@@ -5,6 +5,7 @@ const Async = require('async')
 const klaw = require('klaw')
 const chalk = require('chalk')
 const prettyBytes = require('pretty-bytes')
+const ProgressBar = require('progress')
 const config = require('./config')
 const uploaders = require('./uploaders')
 
@@ -30,11 +31,17 @@ function getPackageFiles (pkgDir) {
   })
 }
 
-async function uploadPackage ({ uploader, pkgDir }) {
+async function uploadPackage ({ uploader, progress, pkgDir }) {
   debug(`uploadPackage start: ${uploader}, ${pkgDir}`)
   const files = await getPackageFiles(pkgDir)
   const pkg = require(path.join(pkgDir, 'package.json'))
   const objectNamePrefix = `${config.prefix || ''}/${pkg.name}@${pkg.version}/`
+  let bar = null
+  if (progress) {
+    bar = new ProgressBar(`${pkg.name}@${pkg.version} [:bar], :current/:total `, {
+      total: files.length
+    })
+  }
 
   return new Promise((resolve, reject) => {
     Async.mapLimit(files, 10, async (file) => {
@@ -42,6 +49,7 @@ async function uploadPackage ({ uploader, pkgDir }) {
       const objectName = `${objectNamePrefix}${relativeFileName}`
       await uploaders[uploader].upload(objectName, file.path)
       debug(`upload file ${file.path} to ${objectName} success`)
+      bar && bar.tick(1)
       return {
         objectName,
         size: file.size
@@ -57,9 +65,9 @@ async function uploadPackage ({ uploader, pkgDir }) {
   })
 }
 
-module.exports = async function upload ({ uploader, pkgDirs }) {
+module.exports = async function upload ({ uploader, progress, pkgDirs }) {
   debug(`upload start, uploader: ${uploader}, packages: ${pkgDirs}`)
-  const uploads = pkgDirs.map(pkgDir => uploadPackage({ uploader, pkgDir }))
+  const uploads = pkgDirs.map(pkgDir => uploadPackage({ uploader, progress, pkgDir }))
   const results = await Promise.all(uploads)
   const files = results.reduce((a, b) => a.concat(b), [])
   const line = Array(80).fill('=').join('')
