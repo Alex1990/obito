@@ -37,10 +37,13 @@ if (shell.exec(`npm install -g --prefix ${cachePrefix} ${pkgs.join(' ')}`).code 
 debug(`packages installed in ${cacheDir}`)
 
 const pkgDirs = pkgs.map(pkg => {
-  const atIndex = pkg.indexOf('@')
+  const firstAtIndex = pkg.indexOf('@')
+  const secondAtIndex = pkg.indexOf('@', firstAtIndex + 1)
   let pkgName = pkg
-  if (atIndex > -1) {
-    pkgName = pkg.slice(0, atIndex)
+  if (firstAtIndex > 0) {
+    pkgName = pkg.slice(0, firstAtIndex)
+  } else if (secondAtIndex > -1) {
+    pkgName = pkg.slice(0, secondAtIndex)
   }
   return path.join(cacheDir, pkgName)
 })
