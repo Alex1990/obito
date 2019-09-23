@@ -57,6 +57,35 @@ describe('sync', () => {
     done()
   }, 30000)
 
+  test('should sync multiple npm private packages to aliyun oss', async (done) => {
+    const client = new OSS(config.aliyun)
+    const versions = ['7.5.0', '7.5.1', '7.5.2']
+    const pkgs = versions.map(version => `@babel/standalone@${version}`)
+    const pkgMains = pkgs.map(pkg => `${pkg}/babel.min.js`)
+    const objectNames = pkgMains.map(pkgMain => `${config.prefix}/${pkgMain}`)
+
+    const ret = shell.exec(`${obitoBin} sync ${pkgs.join(' ')}`)
+    if (ret.code !== 0) {
+      console.error(ret.stderr)
+    } else {
+      console.log(ret.stdout)
+    }
+    expect(ret.code).toBe(0)
+
+    let i = 0
+
+    for (const objectName of objectNames) {
+      const url = await client.signatureUrl(objectName)
+      const res = await rp({
+        url,
+        resolveWithFullResponse: true
+      })
+      expect(res.headers['content-type']).toBe('application/javascript')
+      expect(res.body).toMatch(versions[i++])
+    }
+    done()
+  }, 30000)
+
   test('should sync an npm package to aws s3', async (done) => {
     const client = new S3({
       accessKeyId: config.s3.accessKeyId,

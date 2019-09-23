@@ -7,6 +7,7 @@ const program = require('commander')
 const shell = require('shelljs')
 const chalk = require('chalk')
 const upload = require('../src/upload')
+const { parsePkgName } = require('../src/util')
 
 const homeDir = os.homedir()
 const cachePrefix = path.join(homeDir, 'obito')
@@ -30,23 +31,21 @@ if (!shell.which('npm')) {
   shell.exit(1)
 }
 
-if (shell.exec(`npm install -g --prefix ${cachePrefix} ${pkgs.join(' ')}`).code !== 0) {
+const aliases = []
+const pkgDirs = []
+
+pkgs.forEach(pkg => {
+  const { name, version } = parsePkgName(pkg)
+  const alias = `${name}-${version}`
+  aliases.push(`${alias}@npm:${pkg}`)
+  pkgDirs.push(path.join(cacheDir, alias))
+})
+
+if (shell.exec(`npm install -g --prefix ${cachePrefix} ${aliases.join(' ')}`).code !== 0) {
   shell.echo('npm install error')
   shell.exit(1)
 }
 debug(`packages installed in ${cacheDir}`)
-
-const pkgDirs = pkgs.map(pkg => {
-  const firstAtIndex = pkg.indexOf('@')
-  const secondAtIndex = pkg.indexOf('@', firstAtIndex + 1)
-  let pkgName = pkg
-  if (firstAtIndex > 0) {
-    pkgName = pkg.slice(0, firstAtIndex)
-  } else if (secondAtIndex > -1) {
-    pkgName = pkg.slice(0, secondAtIndex)
-  }
-  return path.join(cacheDir, pkgName)
-})
 
 upload({ uploader, progress, pkgDirs })
   .then(() => {
