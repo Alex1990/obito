@@ -8,6 +8,8 @@ obito (`/ˈɔːbitəu/`): A cli to sync npm package(s) to cloud storage, such as
 npm install --global obito
 ```
 
+**Note: You must use npm >= 6.9.0**
+
 ## Usage
 
 Firstly, create a file named `.obitorc` in your $HOME directory or any other directory.
